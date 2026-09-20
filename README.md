@@ -109,3 +109,18 @@ Chaos тестийн үед нийт 5754 HTTP хүсэлт илгээгдсэн
 ### 3.4 Reliability ба Availability-ийн хамаарал
 
 Chaos тестийн үед серверийн тасалдал нь `/pay` endpoint-д мөн нөлөөлж, error rate 20.02% болсон. Ингэснээр reliability-ийн 8%-ийн threshold FAIL болсон. Availability нь бүх endpoint-ийн хүсэлтүүд амжилттай үйлчилсэн эсэхийг нийтэд нь хэмждэг бол reliability нь тодорхой үйлдэл, тухайлбал `/pay` төлбөрийн хүсэлтийн алдааны давтамжийг хэмждэг. Иймээс availability болон reliability нь хоорондоо холбоотой боловч тусдаа SLI юм.
+
+## 4. Threshold зориуд FAIL болгох туршилт
+
+`/report` endpoint-ийн threshold-ийг зориудаар хэт хатуу болгож `p(95)<100 мс` болгон туршсан. Серверийн `/report` endpoint нь 200–400 мс хооронд санамсаргүй хүлээлттэй тул уг threshold хангагдахгүй.
+
+| Хэмжүүр | Бодит үр дүн | Threshold | Үр дүн |
+|---|---:|---:|---|
+| `/cart/add` p95 latency | 2.41 мс | p95 < 50 мс | PASS |
+| `/report` p95 latency | 390.61 мс | p95 < 100 мс | FAIL |
+| `/pay` error rate | 4.87% | < 8% | PASS |
+| Checks / availability | 98.37% | > 90% | PASS |
+
+k6 нь `/report`-ийн threshold зөрчигдсөнийг илрүүлж, `exit=99` гэсэн non-zero exit code буцаасан. Энэ нь threshold failure гарсан үед CI pipeline build-ийг амжилтгүй болгоход ашиглаж болохыг харуулж байна.
+
+FAIL тестийн бүрэн гаралт `results/fail.txt` файлд хадгалагдсан.
